@@ -1,0 +1,14 @@
+{
+  "name": "sysmonpi",
+  "version": "1.0.0",
+  "description": "linux system monitor managment programming interface",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node ./app/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
