@@ -10,7 +10,7 @@ class ProcessModule{
     }
 
     moduleinit(){
-        console.log('prcesses')
+        
     }
 
     moduleroutes(){
