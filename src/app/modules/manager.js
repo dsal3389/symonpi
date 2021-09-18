@@ -1,40 +1,79 @@
-const services = require('./services/services');
-const users    = require('./users/users');
+const fs = require('fs');
+const path = require('path');
+
+const MODULE_FOLDER = './';
+const MODULE_FOLDER_PATH = path.join(__dirname, MODULE_FOLDER);
+const ENCODING = 'utf-8';
 
 
 class ModuleManager{
     constructor(){
-        this.modules = [
-            services,
-            users
-        ];
-        this._modules = new Map();
+        this.modules = new Map();
     }
 
     /*
-    this function is passed as an emitter to all modules
-    so they (the modules) will be aible to share information
-    with each other
+    * this function is passed as an emitter to all modules
+    * so they (the modules) will be aible to share information
+    * with each other
+    * 
+    * @param {str} module
     */
     getModuleInstance(module){
         if(typeof module == 'string' || module instanceof String){
             return this._modules.get(module);
         }
-        return this._modules.get(module);
+        throw new Error('module lookup requires a string');
     }
 
+    /**
+     * reads modules dynamicliy from variable MODULE_FOLDER_PATH
+     * 
+     * @param {express app} app 
+     */
     loadModulesOn(app){
-        for(let module of this.modules){
-            const module_instance = new module(this.getModuleInstance);
+        this.__read_directory(MODULE_FOLDER_PATH, (err, files) => {
+            if(err !== null) throw err;
 
-            this._modules.set(
-                module_instance.constructor.name.toLocaleLowerCase(), 
-                module_instance
-            );
-            module_instance.moduleinit();
-            module_instance.routes(); // load module routes
-            app.use(module_instance.root, module_instance.app);
-        }
+            for(const item of files){
+                const abspath = path.join(MODULE_FOLDER_PATH, item.name);
+
+                if(this._is_folder(abspath)){
+                    this._load_module(abspath, item.name, app);
+                };
+            }
+        });
+    }
+
+    /**
+     * importing the module from the folder + module_name + '.js', then loading an instance 
+     * on the module and registering it into this.modules, after that calling moduleinit and routes
+     * 
+     *  @param {str} folderpath {str} name, {express app} app
+     */
+    _load_module(folderpath, name, app){
+        const realpath = path.join(folderpath, name + '.js');
+        const module   = require(realpath);
+        const module_instance = new module(this.getModuleInstance);
+
+        this.modules.set(name, module_instance);
+        module_instance.moduleinit();
+        module_instance.moduleroutes();
+
+        app.use(
+            (module_instance.moduleroot !== undefined ? module_instance.moduleroot : '/' + name).toLowerCase(),
+            module_instance.moduleapp
+        );
+    }
+
+    _is_folder(path){
+        return fs.statSync(path, {encoding: ENCODING}).isDirectory();
+    }
+
+    __read_directory(path, callback){
+        fs.readdir(path, {
+            encoding: ENCODING,
+            withFileTypes: true,
+        }, callback);
     }
 }
 

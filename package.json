@@ -4,11 +4,14 @@
   "description": "linux system monitor managment programming interface",
   "main": "index.js",
   "scripts": {
-    "serve": "node ./app/index.js"
+    "serve": "nodemon ./src/app/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }

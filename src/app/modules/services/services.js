@@ -2,10 +2,9 @@ const express = require('express');
 
 
 class ServicesModule{
-    constructor(emitt){
-        this.root = '/services';
-        this.app = express();
-        this.emitter = emitt;
+    constructor(emitter){
+        this.moduleapp  = express();
+        this.emitt = emitter;
         
         this.services = [];
     }
@@ -14,8 +13,8 @@ class ServicesModule{
         
     }
 
-    routes(){
-        this.app.get('/', (req, res) => {
+    moduleroutes(){
+        this.moduleapp.get('/', (req, res) => {
             res.send('services');
         });
     }
