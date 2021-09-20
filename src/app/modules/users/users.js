@@ -2,9 +2,8 @@ const express = require('express');
 
 
 class UsersModule{
-    constructor(emitter){
+    constructor(){
         this.moduleapp = express();
-        this.emitt = emitter;
     }
 
     moduleinit(){

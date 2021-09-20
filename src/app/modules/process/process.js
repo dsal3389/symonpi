@@ -2,11 +2,9 @@ const express = require('express');
 
 
 class ProcessModule{
-    constructor(emitter){
+    constructor(){
         this.moduleapp  = express();
         this.moduleroot = '/proc';
-
-        this.emitt = emitter;
     }
 
     moduleinit(){

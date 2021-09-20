@@ -2,10 +2,8 @@ const express = require('express');
 
 
 class ServicesModule{
-    constructor(emitter){
+    constructor(){
         this.moduleapp  = express();
-        this.emitt = emitter;
-        
         this.services = [];
     }
 

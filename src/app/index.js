@@ -1,14 +1,15 @@
-const express = require('express');
-const ModuleManager = require('./modules/manager');
+const express  = require('express');
+const settings = require('./settings/settings');
+const manager  = require('./modules/manager');
 
 
-const port = 8080;
+const port = settings.get('port');
 
 
-class App{
+class SymonPI{
     constructor(){
         this.app = express();
-        this.manager = new ModuleManager();
+        this.manager = manager;
     }
 
     loadModules(){
@@ -29,7 +30,7 @@ class App{
 }
 
 
-const app = new App();
+const app = new SymonPI();
 app.loadModules();
 app.routes();
 app.run();

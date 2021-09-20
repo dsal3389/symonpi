@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const settings = require('../settings/settings');
+
 
 const MODULE_FOLDER = './';
 const MODULE_FOLDER_PATH = path.join(__dirname, MODULE_FOLDER);
-const ENCODING = 'utf-8';
+const ENCODING = settings.get('encoding');
 
 
 class ModuleManager{
@@ -26,7 +28,8 @@ class ModuleManager{
     }
 
     /**
-     * reads modules dynamicliy from variable MODULE_FOLDER_PATH
+     * reads modules dynamicliy from variable MODULE_FOLDER_PATH,
+     * initilized only once by the SymonPI object
      * 
      * @param {express app} app 
      */
@@ -53,7 +56,7 @@ class ModuleManager{
     _load_module(folderpath, name, app){
         const realpath = path.join(folderpath, name + '.js');
         const module   = require(realpath);
-        const module_instance = new module(this.getModuleInstance);
+        const module_instance = new module();
 
         this.modules.set(name, module_instance);
         module_instance.moduleinit();
@@ -77,5 +80,8 @@ class ModuleManager{
     }
 }
 
-
-module.exports = ModuleManager;
+/**
+ * one manager for the symonpi, allowing all module get the same manager
+ * and share information netween with the function getModuleInstance
+ */
+module.exports = new ModuleManager();
