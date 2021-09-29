@@ -9,18 +9,20 @@ const ENCODING = settings.get('encoding');
 
 
 class ModuleManager{
+    
     constructor(){
         this.modules = new Map();
     }
 
-    /*
-    * this function is passed as an emitter to all modules
-    * so they (the modules) will be aible to share information
-    * with each other
-    * 
-    * @param {str} module
-    */
-    getModuleInstance(module){
+    /**
+     * this function is passed as an emitter to all modules
+     * so they (the modules) will be aible to share information
+     * with each other
+     * 
+     * @param {str} module
+     * @returns {module instance}
+     **/
+    getModuleInstance = (module) => {
         if(typeof module == 'string' || module instanceof String){
             return this._modules.get(module);
         }
@@ -33,7 +35,7 @@ class ModuleManager{
      * 
      * @param {express app} app 
      */
-    loadModulesOn(app){
+    loadModulesOn = (app) => {
         this.__read_directory(MODULE_FOLDER_PATH, (err, files) => {
             if(err !== null) throw err;
 
@@ -51,9 +53,11 @@ class ModuleManager{
      * importing the module from the folder + module_name + '.js', then loading an instance 
      * on the module and registering it into this.modules, after that calling moduleinit and routes
      * 
-     *  @param {str} folderpath {str} name, {express app} app
+     *  @param {str} folderpath
+     *  @param {str} name
+     *  @param {express app} app
      */
-    _load_module(folderpath, name, app){
+    _load_module = (folderpath, name, app) => {
         const realpath = path.join(folderpath, name + '.js');
         const module   = require(realpath);
         const module_instance = new module();

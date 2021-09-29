@@ -4,7 +4,8 @@
   "description": "linux system monitor managment programming interface",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon ./src/app/index.js"
+    "serve": "nodemon ./src/app/index.js",
+    "test": "sh ./tests/test.sh localhost:8080"
   },
   "author": "",
   "license": "ISC",
