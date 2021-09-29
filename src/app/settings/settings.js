@@ -7,15 +7,23 @@ const VALUE_FIELD = 'value';
 
 
 class Settings{
+    
     constructor(path){
         this.path = path;
         this._settings = new Map([
-            ['port', {value: 8080, _writeable: true}],
-            ['encoding', {value: 'utf-8', _writeable: true}]
+            ['port',        { value: 8080, _writeable: true }],
+            ['usersFile',   { value: '/etc/passwd', _writeable: false }],
+            ['encoding',    { value: 'utf-8', _writeable: true }]
         ]);
         this._read_settings();
     }
 
+    /** 
+     * get a settings value, return undefined if this key does not exists
+     * 
+     * @param {str} key
+     * @returns {any | undefined}
+     **/
     get(key){
         const value = this._settings.get(key);
 
@@ -24,6 +32,14 @@ class Settings{
         }
     }
 
+    /**
+     * setting a key value, the writable option tells if this value
+     * can be changed after this initilization, like a const
+     * 
+     * @param {str} key
+     * @param {any} value
+     * @param {boolean} writeable
+     **/
     set(key, value, writeable=true){
 
         if(this._settings.has(key)){
@@ -52,7 +68,7 @@ class Settings{
     /**
      * read the settings file as the Settings instance is being created,
      * allowing for an early error (in case there is any)
-     */
+     **/
     _read_settings(){
         const content = fs.readFileSync(this.path, {encoding: 'utf-8'});
         const objcontent = JSON.parse(content);
