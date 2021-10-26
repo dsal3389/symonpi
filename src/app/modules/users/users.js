@@ -28,11 +28,39 @@ class UsersModule{
             const uid = req.params.uid;
             const user = this.shadowfile.getUserByID(uid);
 
-            if(user == null){
-                return res.status(404).send(`user with the uid ${uid} not found`);
+            if(user === undefined){
+                res.status(404).send(`user with the uid ${uid} not found`);
             }
-
             res.send(user);
+        });
+
+        this.moduleapp.delete('/:uid', (req, res) => {
+            const uid = req.params.uid;
+            const user = this.shadowfile.getUserByID(uid);
+
+            if(user === undefined){
+                return res.status(404).send('could not find client with the given UID to delete');
+            }
+            
+            const removehome = req.query.removehome == 'true';
+            const force = req.query.force == 'true';
+
+            shadowfile.deleteUser(user.name, removehome, force).then(
+                (code) => res.status(200).send(`client with the uid of ${uid} deleted (${user})`),
+                (code) => {
+                    const errormessages = {
+                        1: 'cant update password file',
+                        2: 'invalid command syntax',
+                        6: 'specific user does not exists',
+                        8: 'user currently logged',
+                        10: 'cant update group file',
+                        12: 'cant remove home directory'
+                    };
+
+                    res.status(406).send(errormessages[code]);
+                }
+            );
+            
         });
 
         this.moduleapp.post('/create', (req, res) => {

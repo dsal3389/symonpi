@@ -208,6 +208,23 @@ module.exports.shadowfile = new (class ShadowFile extends FileAbstruct{
         });
     }
 
+    deleteUser(name, removehome, force=false){
+        const userdelargs = [name];
+
+        if(removehome){  userdelargs.push('-r'); }
+        if(force){ userdelargs.push('-f'); }
+
+        const userdel = spawn('userdel', userdelargs);
+        return new Promise((resolve, reject) => {
+            userdel.on('close', (code) => {
+                if(code === 0){
+                    return resolve(code);
+                }
+                reject(code);
+            });
+        });
+    }
+
     /**
      * convert the /etc/passwd format to list that contain
      * objects, those objects are the users
