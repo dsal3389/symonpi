@@ -1,4 +1,5 @@
 const express  = require('express');
+const bodyParser = require('body-parser');
 
 const settings = require('./settings/settings');
 const manager  = require('./modules/manager');
@@ -22,6 +23,9 @@ class SymonPI{
 
     middleware = () => {
         this.app.use(logging._loggingMiddleware);
+        this.app.use(bodyParser.urlencoded({ extended: true }));
+        this.app.use(bodyParser.json());
+        this.app.use(bodyParser.raw());
     }
 
     run = () => {

@@ -13,7 +13,9 @@ class Settings{
         this._settings = new Map([
             ['port',        { value: 8080, _writeable: true }],
             ['usersFile',   { value: '/etc/passwd', _writeable: false }],
-            ['encoding',    { value: 'utf-8', _writeable: true }]
+            ['encoding',    { value: 'utf-8', _writeable: true }],
+            ['loggingFile', { value: '/var/log/symonpi.log', _writeable: true }],
+            ['shellsfile',  { value: '/etc/shells', _writeable: false }]
         ]);
         this._read_settings();
     }

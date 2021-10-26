@@ -23,7 +23,7 @@ class ModuleManager{
      * @returns {module instance}
      **/
     getModuleInstance = (module) => {
-        if(typeof module == 'string' || module instanceof String){
+        if(typeof module === 'string'){
             return this._modules.get(module);
         }
         throw new Error('module lookup requires a string');

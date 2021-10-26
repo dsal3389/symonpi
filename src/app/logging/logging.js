@@ -4,7 +4,7 @@ const settings = require('../settings/settings');
 
 
 const ENCODING = settings.get('encoding');
-const LOGGING_FILE = settings.get('loggingFile');
+const LOGGING_FILE = settings.get('loggingfile');
 
 
 exports.CARITICAL = CRITICAL = 50;
@@ -16,7 +16,7 @@ exports.DEBUG = DEBUG = 0;
 /* default formatter, can be changed (not recommanded) */
 exports.fmt = FMT = (message, level, modulename) => {
     const date = new Date().toLocaleTimeString();
-    return `[${date}] [${modulename}] [${level}] ${message}\n`;
+    return `[${date}] [${modulename}] [${level}] ${message}`;
 };
 
 
@@ -38,7 +38,10 @@ class Logging{
      */
     log = (message, level=INFO) => {
         if(level <= this.level){
-            this.write(this.fmt(message, this.level, this.name));
+            const formatted = this.fmt(message, this.level, this.name);
+
+            console.log(formatted);
+            this.write(formatted);
         }
     };
 
