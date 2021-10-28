@@ -1,13 +1,15 @@
 const express = require('express');
 
-const { shadowfile, shells } = require('./_users');
+const { shadowfile, passwd, shells } = require('./_users');
+
+
+const usernotfoundmsg = (uid) => `given user with the uid ${uid} was not found`;
 
 
 class UsersModule{
 
     constructor(){
         this.moduleapp  = express();
-        this.shadowfile = shadowfile; // allowing other modules import this variable
     }
 
     moduleinit(){
@@ -15,60 +17,22 @@ class UsersModule{
     }
 
     moduleroutes(){
+        
         this.moduleapp.get('/list', (req, res) => {
-            const users = this.shadowfile.getUsers(...Object.keys(req.query));
+            const users = shadowfile.getUsers(...Object.keys(req.query));
             res.send(users);
         });
 
         this.moduleapp.get('/search', (req, res) => {
-            res.send(this.shadowfile.search(req.query));
-        });
-
-        this.moduleapp.get('/:uid', (req, res) => {
-            const uid = req.params.uid;
-            const user = this.shadowfile.getUserByID(uid);
-
-            if(user === undefined){
-                res.status(404).send(`user with the uid ${uid} not found`);
-            }
-            res.send(user);
-        });
-
-        this.moduleapp.delete('/:uid', (req, res) => {
-            const uid = req.params.uid;
-            const user = this.shadowfile.getUserByID(uid);
-
-            if(user === undefined){
-                return res.status(404).send('could not find client with the given UID to delete');
-            }
-            
-            const removehome = req.query.removehome == 'true';
-            const force = req.query.force == 'true';
-
-            shadowfile.deleteUser(user.name, removehome, force).then(
-                (code) => res.status(200).send(`client with the uid of ${uid} deleted (${user})`),
-                (code) => {
-                    const errormessages = {
-                        1: 'cant update password file',
-                        2: 'invalid command syntax',
-                        6: 'specific user does not exists',
-                        8: 'user currently logged',
-                        10: 'cant update group file',
-                        12: 'cant remove home directory'
-                    };
-
-                    res.status(406).send(errormessages[code]);
-                }
-            );
-            
+            res.send(shadowfile.search(req.query));
         });
 
         this.moduleapp.post('/create', (req, res) => {
-            const name = req.body.name;
+            const name  = req.body.name;
             const shell = req.body.shell || '/bin/sh';
             const group = req.body.group || null;
-            const create_home = req.body.create_home !== undefined ? req.body.create_home : true;
-            const home = req.body.home || null;
+            const home  = req.body.home  || null;
+            const create_home = req.body.create_home === 'true';
 
             if(name === undefined){
                 return res.status(406).send('missing required parameters: name');
@@ -83,20 +47,60 @@ class UsersModule{
                 create_home, group, home
             ).then(
                 (code) =>  res.status(201).send(`user ${name} created`),
-                (code) =>  {
-                    const errormessages = { // non related error codes will not be here
-                        1: 'cant update password',
-                        3: 'invalid argument to option',
-                        6: 'specified group does not exists',
-                        9: 'username already in use',
-                        10: 'cant update group file',
-                        12: 'cant create home directory',
-                        13: 'cant create mail spool',
-                        14: 'cant update SELinux user mapping'
-                    }
+                (code) =>  res.status(406).send(shadowfile.createErrorMessages[code])
+            );
+        });
 
-                    res.status(406).send(errormessages[code]);
-                }
+        this.moduleapp.get('/:uid', (req, res) => {
+            const uid = req.params.uid;
+            const user = shadowfile.getUserByID(uid);
+            
+            if(user === undefined){
+                return res.status(404).send(usernotfoundmsg(uid));
+            }
+
+            res.send(user);
+        });
+
+        this.moduleapp.delete('/:uid', (req, res) => {
+            const uid = req.params.uid;
+            const user = shadowfile.getUserByID(uid);
+
+            if(user === undefined){
+                return res.status(404).send(usernotfoundmsg(uid));
+            }
+
+            const removehome = req.query.removehome == 'true';
+            const force = req.query.force == 'true';
+
+            shadowfile.deleteUser(user.name, removehome, force).then(
+                (code) => res.status(200).send(`client with the uid of ${uid} deleted (${user})`),
+                (code) => res.status(406).send(shadowfile.deleteErrorMessages[code])
+            );
+        }); 
+
+        this.moduleapp.put('/:uid/passwd', (req, res) => {
+            const uid = req.params.uid;
+            const user = shadowfile.getUserByID(uid);
+
+            if(user === undefined){
+                return res.status(404).send(usernotfoundmsg(uid));
+            }
+
+            // need to configure it as well
+        });
+
+        this.moduleapp.delete('/:uid/passwd', (req, res) => {
+            const uid = req.params.uid;
+            const user = shadowfile.getUserByID(uid);
+
+            if(user === undefined){
+                return res.status(404).send(usernotfoundmsg(uid));
+            }
+
+            passwd.deletePassword(user.name).then(
+                (code) => res.status(200).send(`password deleted for user ${user.name}`),
+                (code) => res.status(406).send(passwd.errorMessages[code])
             );
         });
     }

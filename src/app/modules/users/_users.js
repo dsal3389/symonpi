@@ -86,6 +86,45 @@ exports.shells = new (class UserShells extends FileAbstruct{
 
 })(SHELL_FILE);
 
+module.exports.passwd = new (class PasswdFIle{
+
+    constructor(){
+        this.hashtypes = {
+            '1': 'md5',
+            '2a': 'blowfish',
+            '2y': 'blowfish',
+            '5': 'sha-256',
+            '6': 'sha-512'   
+        };
+
+        this.errorMessages = {
+            1: 'permission denied',
+            2: 'invalid combination of options',
+            3: 'unexpected failure, nothing done',
+            4: 'unexpected faulure, passwd file missing',
+            5: 'passwfile busy, try again',
+            6: 'inavlid argument to option'
+        }
+    }
+
+    setPasswordFromPlan(name, password){
+        // will be filled
+    }
+
+    deletePassword(name){
+        const passwd = spawn('passwd', ['-d', name]);
+        return new Promise((resolve, reject) => {
+            passwd.on('close', (code) => {
+                if(code === 0){
+                    return resolve(code);
+                }
+                reject(code);
+            });
+        });
+    }
+
+})();
+
 /**
  * exports a ShadowFile class instance
  */
@@ -94,6 +133,26 @@ module.exports.shadowfile = new (class ShadowFile extends FileAbstruct{
     constructor(path){
         super(path);
         this._users = [];
+
+        this.createErrorMessages = { 
+            1: 'cant update password',
+            3: 'invalid argument to option',
+            6: 'specified group does not exists',
+            9: 'username already in use',
+            10: 'cant update group file',
+            12: 'cant create home directory',
+            13: 'cant create mail spool',
+            14: 'cant update SELinux user mapping'
+        }
+
+        this.deleteErrorMessages = {
+            1: 'cant update password file',
+            2: 'invalid command syntax',
+            6: 'specific user does not exists',
+            8: 'user currently logged',
+            10: 'cant update group file',
+            12: 'cant remove home directory'
+        }
     }
 
     /**
@@ -216,12 +275,14 @@ module.exports.shadowfile = new (class ShadowFile extends FileAbstruct{
 
         const userdel = spawn('userdel', userdelargs);
         return new Promise((resolve, reject) => {
+
             userdel.on('close', (code) => {
                 if(code === 0){
                     return resolve(code);
                 }
                 reject(code);
             });
+
         });
     }
 
